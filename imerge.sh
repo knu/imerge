@@ -78,7 +78,7 @@ do_imerge () {
 
     echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
-    echo -n "$MYNAME: Install source file? (N/y)  Merge source and destination files? (m): "
+    echo -n "$MYNAME: Install source file, or merge source and destination files? (N/y/m): "
     read ans </dev/tty
     case "${ans:-N}" in
         [Yy]*)
@@ -96,7 +96,7 @@ do_imerge () {
         sdiff -a -s -o "$dest.merged" "$src" "$dest" 2>/dev/null
         diff -u "$dest.merged" "$dest" | "${PAGER:-more}"
 
-        echo -n "$MYNAME: Install merged file? (N/y)  Redo the merge? (m): "
+        echo -n "$MYNAME: Install merged file, or redo the merge? (N/y/m): "
         read ans </dev/tty
         case "${ans:-N}" in
             [Yy]*)
