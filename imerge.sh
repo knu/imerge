@@ -46,7 +46,7 @@ do_imerge () {
         echo "$MYNAME: $src => $dest: Source file is not found."
 
         echo -n "$MYNAME: Delete destination file? (N/y): "
-        read ans
+        read ans </dev/tty
         case "${ans:-N}" in
             [Yy]*)
                 rm -f "$dest"
@@ -60,7 +60,7 @@ do_imerge () {
         echo "$MYNAME: $src => $dest: Destination file is not found."
 
         echo -n "$MYNAME: Install source file? (N/y): "
-        read ans
+        read ans </dev/tty
         case "${ans:-N}" in
             [Yy]*)
                 cp -p "$src" "$dest"
@@ -79,7 +79,7 @@ do_imerge () {
     echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
     echo -n "$MYNAME: Install source file? (N/y)  Merge source and destination files? (m): "
-    read ans
+    read ans </dev/tty
     case "${ans:-N}" in
         [Yy]*)
             cp -p "$src" "$dest"
@@ -97,7 +97,7 @@ do_imerge () {
         diff -u "$dest.merged" "$dest" | "${PAGER:-more}"
 
         echo -n "$MYNAME: Install merged file? (N/y)  Redo the merge? (m): "
-        read ans
+        read ans </dev/tty
         case "${ans:-N}" in
             [Yy]*)
                 cat "$dest.merged" > "$dest"
