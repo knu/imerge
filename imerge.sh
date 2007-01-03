@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# imerge - merge two files interactively
+# imerge - merge one file to another interactively
 #
 # Copyright (c) 2007 Akinori MUSHA
 #
@@ -74,7 +74,7 @@ do_imerge () {
         return
     fi
 
-    diff -u "$src" "$dest" | "${PAGER:-more}"
+    diff -u "$dest" "$src" | "${PAGER:-more}"
 
     echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
