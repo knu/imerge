@@ -42,6 +42,16 @@ do_imerge () {
     src="$1";  shift
     dest="$1"; shift
 
+    if [ -L "$src" ]; then
+        echo "$MYNAME: $src => $dest: Source file is a symlink."
+        return
+    fi
+
+    if [ -L "$dest" ]; then
+        echo "$MYNAME: $src => $dest: Destination file is a symlink."
+        return
+    fi
+
     if [ ! -f "$src" ]; then
         echo "$MYNAME: $src => $dest: Source file is not found."
 
