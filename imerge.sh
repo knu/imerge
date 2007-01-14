@@ -30,7 +30,11 @@
 #
 # The latest version of this script can be downloaded from a read-only
 # subversion repository available at the following URL:
+#
 #     http://svn.idaemons.org/repos/imerge/
+#
+# Typically you just want the trunk/ subdirectory out of the whole
+# source tree including all the past release snapshots and so on.
 #
 # $Id$
 
