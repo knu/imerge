@@ -27,17 +27,26 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
+#
+# The latest version of this script can be downloaded from a read-only
+# subversion repository available at the following URL:
+#     http://svn.idaemons.org/repos/imerge/
+#
 # $Id$
 
 MYNAME="$(basename "$0")"
+VERSION="0.1.0"
 
 usage () {
-      echo "usage: $MYNAME source destination" >&2
-      exit 1
+    {
+        echo "imerge version $VERSION - merge one file to another interactively"
+        echo "usage: $MYNAME source destination"
+    } >&2
+    exit 1
 }
 
 do_imerge () {
-    local src dest ans
+    local src dest merged ans
 
     src="$1";  shift
     dest="$1"; shift
@@ -102,22 +111,30 @@ do_imerge () {
             ;;
     esac
 
+    merged="$(mktemp "$dest.merged.XXXXXX")"
+
+    finalize () {
+        rm -f "$merged"
+    }
+
+    trap "finalize; exit 130" 1 2 3 15
+
     while :; do
-        sdiff -a -s -o "$dest.merged" "$src" "$dest" 2>/dev/null
-        diff -u "$dest.merged" "$dest" | "${PAGER:-more}"
+        sdiff -a -s -o "$merged" "$src" "$dest" 2>/dev/null
+        diff -u "$merged" "$dest" | "${PAGER:-more}"
 
         echo -n "$MYNAME: Install merged file, or redo the merge? (N/y/m): "
         read ans </dev/tty
         case "${ans:-N}" in
             [Yy]*)
-                cat "$dest.merged" > "$dest"
+                cat "$merged" > "$dest"
                 ;;
             [Mm]*)
                 continue
                 ;;
         esac
 
-        rm -f "$dest.merged"
+        finalize
         return
     done
 }
