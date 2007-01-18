@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# imerge - merge one file to another interactively
+# imerge - help merge one file to another interactively
 #
 # Copyright (c) 2007 Akinori MUSHA
 #
@@ -39,14 +39,22 @@
 # $Id$
 
 MYNAME="$(basename "$0")"
-VERSION="0.1.0"
+VERSION="0.2.0"
 
 usage () {
     {
-        echo "imerge version $VERSION - merge one file to another interactively"
-        echo "usage: $MYNAME source destination"
+        echo "imerge version $VERSION - help merge one file to another interactively"
+        echo "usage: $MYNAME [ -x diff_flags ] [ -X sdiff_flags ] source destination"
     } >&2
     exit 1
+}
+
+call_diff () {
+    diff ${DIFF_FLAGS} "$@"
+}
+
+call_sdiff () {
+    sdiff ${SDIFF_FLAGS} "$@"
 }
 
 do_imerge () {
@@ -97,23 +105,29 @@ do_imerge () {
         return
     fi
 
-    diff -u "$dest" "$src" | "${PAGER:-more}"
+    while :; do
+        call_diff "$dest" "$src" | "${PAGER:-more}"
 
-    echo "$MYNAME: $src => $dest: Destination file differs from source file."
+        echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
-    echo -n "$MYNAME: Install source file, or merge source and destination files? (N/y/m): "
-    read ans </dev/tty
-    case "${ans:-N}" in
-        [Yy]*)
-            cp -p "$src" "$dest"
-            return
-            ;;
-        [Mm]*)
-            ;;
-        *)
-            return
-            ;;
-    esac
+        echo -n "$MYNAME: Install source file, edit files, or merge them? (N/y/e/m): "
+        read ans </dev/tty
+        case "${ans:-N}" in
+            [Yy]*)
+                cp -p "$src" "$dest"
+                return
+                ;;
+            [Ee]*)
+                "$EDITOR" "$src" "$dest"
+                ;;
+            [Mm]*)
+                break
+                ;;
+            *)
+                return
+                ;;
+        esac
+    done
 
     merged="$(mktemp "$dest.merged.XXXXXX")"
 
@@ -123,17 +137,23 @@ do_imerge () {
 
     trap "finalize; exit 130" 1 2 3 15
 
-    while :; do
-        sdiff -a -s -o "$merged" "$src" "$dest" 2>/dev/null
-        diff -u "$merged" "$dest" | "${PAGER:-more}"
+    call_sdiff -o "$merged" "$src" "$dest"
 
-        echo -n "$MYNAME: Install merged file, or redo the merge? (N/y/m): "
+    while :; do
+        call_diff "$merged" "$dest" | "${PAGER:-more}"
+
+        echo -n "$MYNAME: Install merged file, edit files, or redo the merge? (N/y/e/m): "
         read ans </dev/tty
         case "${ans:-N}" in
             [Yy]*)
                 cat "$merged" > "$dest"
                 ;;
+            [Ee]*)
+                "$EDITOR" "$src" "$dest" "$merged"
+                continue
+                ;;
             [Mm]*)
+                call_sdiff -o "$merged" "$src" "$dest"
                 continue
                 ;;
         esac
@@ -142,6 +162,25 @@ do_imerge () {
         return
     done
 }
+
+DIFF_FLAGS="-u"
+SDIFF_FLAGS="-a -s"
+
+while getopts x:X: o; do
+    case "$o" in
+        x)
+            DIFF_FLAGS="$OPTARG"
+            ;;
+        X)
+            SDIFF_FLAGS="$OPTARG"
+            ;;
+        \?)
+            usage
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
 
 if [ $# -ne 2 ]; then
    usage

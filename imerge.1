@@ -2,18 +2,19 @@
 .\"
 .Dd Janunary 15, 2007
 .Dt IMERGE 1
-.Os FreeBSD
 .Sh NAME
 .Nm imerge
-.Nd merges one file to another interactively
+.Nd help merge one file to another interactively
 .Sh SYNOPSIS
 .Nm
+.Op Fl x Ar diff_flags
+.Op Fl X Ar sdiff_flags
 .Ar source
 .Ar destination
 .Sh DESCRIPTION
 The
 .Nm
-command is a utility to merge one file to another interactively.
+command is a utility to help merge one file to another interactively.
 .Pp
 If given files both exist and are identical, it silently exits without
 doing anything.
@@ -22,8 +23,8 @@ If given files both exist and they differ, differences are shown using
 the
 .Xr diff 1
 command and user is asked if the source file should be installed to
-the destination, or merge the source file into the destination file
-interactively using the
+the destination, they should be edited first, or the source file
+should be merged into the destination file interactively using the
 .Xr sdiff 1
 command.
 .Pp
@@ -33,9 +34,37 @@ should be deleted.
 If the destination file is missing, user is asked if the source file
 should be installed to the destination.
 .Pp
-.Sh OPTIONS
-There is no command line option defined at the moment.
+Currently symbolic links are not supported.  If either of given files
+is a symbolic link, no operation is performed.
 .Pp
+.Sh OPTIONS
+The following command line arguments are supported:
+.Pp
+.Bl -tag -width "-X sdiff_flags" -compact
+.It Fl x Ar diff_flags
+Set command line flags for
+.Xr diff 1
+to
+.Ar diff_flags .
+The default value is
+.Dq Fl u .
+.Pp
+.It Fl X Ar sdiff_flags
+Set extra command line flags for
+.Xr sdiff 1
+to
+.Ar sdiff_flags .
+The default value is
+.Dq Fl a Fl s .
+.El
+.Sh ENVIRONMENT
+.Bl -tag -width "TMPDIR" -compact
+.It Ev EDITOR
+Name of the editor program to run when user chooses to edit files.
+.Pp
+.It Ev PAGER
+Name of the pager program to run when showing differences.
+.El
 .Sh SEE ALSO
 .Xr diff 1 ,
 .Xr sdiff 1
