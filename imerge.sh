@@ -143,7 +143,7 @@ do_imerge () {
     call_sdiff -o "$merged" "$src" "$dest"
 
     while :; do
-        call_diff "$merged" "$dest" | "${PAGER:-more}"
+        call_diff "$dest" "$merged" | "${PAGER:-more}"
 
         echo -n "$MYNAME: Install merged file, edit files, or redo the merge? (N/y/e/m): "
         read ans </dev/tty
