@@ -41,6 +41,9 @@
 MYNAME="$(basename "$0")"
 VERSION="0.2.0"
 
+# workaround for ksh not having "local"
+__f__ () { local __x__; }; eval __f__ 2>/dev/null || local () { for __x__; do case "$__x__" in *=*) $__x__ ;; esac; done }; unset __f__ __x__
+
 usage () {
     {
         echo "imerge version $VERSION - help merge one file to another interactively"
