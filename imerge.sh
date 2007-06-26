@@ -109,7 +109,7 @@ do_imerge () {
     fi
 
     while :; do
-        call_diff "$dest" "$src" | "${PAGER:-more}"
+        call_diff -L "destination: $(ls -l "$dest")" -L "source:      $(ls -l "$src")" "$dest" "$src" | "${PAGER:-more}"
 
         echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
@@ -143,7 +143,7 @@ do_imerge () {
     call_sdiff -o "$merged" "$src" "$dest"
 
     while :; do
-        call_diff "$dest" "$merged" | "${PAGER:-more}"
+        call_diff -L "destination: $(ls -l "$dest")" -L "merged:      $(ls -l "$merged")" "$dest" "$merged" | "${PAGER:-more}"
 
         echo -n "$MYNAME: Install merged file, edit files, or redo the merge? (N/y/e/m): "
         read ans </dev/tty
