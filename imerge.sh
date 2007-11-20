@@ -39,7 +39,7 @@
 # $Id$
 
 MYNAME="$(basename "$0")"
-VERSION="0.2.1"
+VERSION="0.2.2"
 
 # workaround for ksh not having "local"
 __f__ () { local __x__; }; eval __f__ 2>/dev/null || local () { for __x__; do case "$__x__" in *=*) $__x__ ;; esac; done }; unset __f__ __x__
@@ -61,7 +61,7 @@ call_sdiff () {
 }
 
 do_imerge () {
-    local src dest merged ans
+    local src dest merged ans endloop contloop line1 line2
 
     src="$1";  shift
     dest="$1"; shift
@@ -79,13 +79,18 @@ do_imerge () {
     if [ ! -f "$src" ]; then
         echo "$MYNAME: $src => $dest: Source file is not found."
 
-        echo -n "$MYNAME: Delete destination file? (N/y): "
-        read ans </dev/tty
-        case "${ans:-N}" in
-            [Yy]*)
-                rm -f "$dest"
-                ;;
-        esac
+        while printf "%s" "$MYNAME: Delete destination file, or skip? (d/S): "; do
+            read ans </dev/tty
+            case "${ans:-S}" in
+                [Dd]*)
+                    rm -f "$dest"
+                    break
+                    ;;
+                [Ss]*)
+                    break
+                    ;;
+            esac
+        done
 
         return
     fi
@@ -93,13 +98,18 @@ do_imerge () {
     if [ ! -f "$dest" ]; then
         echo "$MYNAME: $src => $dest: Destination file is not found."
 
-        echo -n "$MYNAME: Install source file? (N/y): "
-        read ans </dev/tty
-        case "${ans:-N}" in
-            [Yy]*)
-                cp -p "$src" "$dest"
-                ;;
-        esac
+        while printf "%s" "$MYNAME: Install source file? (i/S): "; do
+            read ans </dev/tty
+            case "${ans:-S}" in
+                [Ii]*)
+                    cp -p "$src" "$dest"
+                    break;
+                    ;;
+                [Ss]*)
+                    break
+                    ;;
+            esac
+        done
 
         return
     fi
@@ -109,27 +119,38 @@ do_imerge () {
     fi
 
     while :; do
-        call_diff -L "destination: $(ls -l "$dest")" -L "source:      $(ls -l "$src")" "$dest" "$src" | "${PAGER:-more}"
+        ls -l "$dest" "$src" | {
+            read line1
+            read line2
+            call_diff -L "destination: $line1" -L "source:      $line2" "$dest" "$src"
+        } | "${PAGER:-more}"
 
         echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
-        echo -n "$MYNAME: Install source file, edit files, or merge them? (N/y/e/m): "
-        read ans </dev/tty
-        case "${ans:-N}" in
-            [Yy]*)
-                cp -p "$src" "$dest"
-                return
-                ;;
-            [Ee]*)
-                "$EDITOR" "$src" "$dest"
-                ;;
-            [Mm]*)
-                break
-                ;;
-            *)
-                return
-                ;;
-        esac
+        endloop=
+
+        while printf "%s" "$MYNAME: Install source file, edit files, merge them, or skip? (i/e/m/S): "; do
+            read ans </dev/tty
+            case "${ans:-S}" in
+                [Ii]*)
+                    cp -p "$src" "$dest"
+                    return
+                    ;;
+                [Ee]*)
+                    "$EDITOR" "$src" "$dest"
+                    break
+                    ;;
+                [Mm]*)
+                    endloop=t
+                    break
+                    ;;
+                [Ss]*)
+                    return
+                    ;;
+            esac
+        done
+
+        [ -n "$endloop" ] && break
     done
 
     merged="$(mktemp "$dest.merged.XXXXXX")"
@@ -140,26 +161,49 @@ do_imerge () {
 
     trap "finalize; exit 130" 1 2 3 15
 
+    ls -l "$dest" "$src" | {
+        read line1
+        read line2
+        echo "--- left (source):		$line1"
+        echo "+++ right (destination):	$line2"
+    }
     call_sdiff -o "$merged" "$src" "$dest"
 
     while :; do
-        call_diff -L "destination: $(ls -l "$dest")" -L "merged:      $(ls -l "$merged")" "$dest" "$merged" | "${PAGER:-more}"
+        ls -l "$dest" "$src" | {
+            read line1
+            read line2
+            call_diff -L "destination: $line1" -L "merged:      $line2" "$dest" "$merged"
+        } | "${PAGER:-more}"
 
-        echo -n "$MYNAME: Install merged file, edit files, or redo the merge? (N/y/e/m): "
-        read ans </dev/tty
-        case "${ans:-N}" in
-            [Yy]*)
-                cat "$merged" > "$dest"
-                ;;
-            [Ee]*)
-                "$EDITOR" "$src" "$dest" "$merged"
-                continue
-                ;;
-            [Mm]*)
-                call_sdiff -o "$merged" "$src" "$dest"
-                continue
-                ;;
-        esac
+        contloop=
+
+        while printf "%s" "$MYNAME: Install merged file, edit files, redo the merge, or skip? (i/e/r/S): "; do
+            read ans </dev/tty
+            case "${ans:-S}" in
+                [Ii]*)
+                    cat "$merged" > "$dest"
+                    break
+                    ;;
+                [Ee]*)
+                    "$EDITOR" "$src" "$dest" "$merged"
+                    contloop=t
+                    break
+                    ;;
+                [Rr]*)
+                    echo "--- left (source):		$(ls -l "$src")"
+                    echo "+++ right (destination):	$(ls -l "$dest")"
+                    call_sdiff -o "$merged" "$src" "$dest"
+                    contloop=t
+                    break
+                    ;;
+                [Ss]*)
+                    break
+                    ;;
+            esac
+        done
+
+        [ -n "$contloop" ] && continue
 
         finalize
         return
