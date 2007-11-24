@@ -161,7 +161,7 @@ do_imerge () {
 
     trap "finalize; exit 130" 1 2 3 15
 
-    ls -l "$dest" "$src" | {
+    ls -l "$src" "$dest" | {
         read line1
         read line2
         echo "--- left (source):		$line1"
@@ -170,7 +170,7 @@ do_imerge () {
     call_sdiff -o "$merged" "$src" "$dest"
 
     while :; do
-        ls -l "$dest" "$src" | {
+        ls -l "$dest" "$merged" | {
             read line1
             read line2
             call_diff -L "destination: $line1" -L "merged:      $line2" "$dest" "$merged"
