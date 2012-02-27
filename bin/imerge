@@ -2,7 +2,7 @@
 #
 # imerge - help merge one file to another interactively
 #
-# Copyright (c) 2007 Akinori MUSHA
+# Copyright (c) 2007, 2008, 2012 Akinori MUSHA
 #
 # All rights reserved.
 #
@@ -28,15 +28,10 @@
 # SUCH DAMAGE.
 #
 #
-# The latest version of this script can be downloaded from a read-only
-# subversion repository available at the following URL:
+# Visit the GitHub repository for the latest information and feedback.
 #
-#     http://svn.idaemons.org/repos/imerge/
+#     https://github.com/knu/imerge
 #
-# Typically you just want the trunk/ subdirectory out of the whole
-# source tree including all the past release snapshots and so on.
-#
-# $Id$
 
 MYNAME="$(basename "$0")"
 VERSION="0.2.2"
