@@ -5,8 +5,8 @@ BINDIR=		${PREFIX}/bin
 MANPREFIX?=	${PREFIX}
 MANDIR=		${MANPREFIX}/man/man
 
-SCRIPTS=	imerge.sh
-MAN=		imerge.1
+SCRIPTS=	bin/imerge
+MAN=		man/imerge.1
 
 .PATH:	${.CURDIR}/..
 
