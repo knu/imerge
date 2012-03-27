@@ -74,6 +74,8 @@ stand-alone.
 
 ## AUTHORS
 
+Akinori MUSHA <knu@iDaemons.org>
+
 Licensed under the 2-clause BSD license.  See `LICENSE.txt` for
 details.
 
