@@ -43,6 +43,7 @@ usage () {
     {
         echo "imerge version $VERSION - help merge one file to another interactively"
         echo "usage: $MYNAME [ -x diff_flags ] [ -X sdiff_flags ] source destination"
+        echo "       $MYNAME [ -x diff_flags ] [ -X sdiff_flags ] [ -@ { file | - } ]"
     } >&2
     exit 1
 }
@@ -205,11 +206,22 @@ do_imerge () {
     done
 }
 
+unset files_from
 DIFF_FLAGS="-u"
 SDIFF_FLAGS="-a -s"
 
-while getopts x:X: o; do
+while getopts @:x:X: o; do
     case "$o" in
+        @)
+            case "$OPTARG" in
+                -)
+                    files_from=/dev/stdin
+                    ;;
+                *)
+                    files_from="$OPTARG"
+                    ;;
+            esac
+            ;;
         x)
             DIFF_FLAGS="$OPTARG"
             ;;
@@ -222,10 +234,32 @@ while getopts x:X: o; do
     esac
 done
 
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
-if [ $# -ne 2 ]; then
-   usage
-fi
+case $# in
+    0)
+        if [ "${files_from+t}" ]; then
+            ifs="$IFS"
+            while :; do
+                IFS='
+'
+                read -r src  || break
+                read -r dest || {
+                    echo "$0: odd number of lines" >&2
+                    exit 1
+                }
+                IFS="$ifs"
+                do_imerge "$src" "$dest"
+            done < "$files_from"
+            exit
+        fi
+        ;;
+    2)
+        if ! [ "${files_from+t}" ]; then
+            do_imerge "$@"
+            exit
+        fi
+        ;;
+esac
 
-do_imerge "$@"
+usage
