@@ -115,11 +115,10 @@ do_imerge () {
     fi
 
     while :; do
-        ls -l "$dest" "$src" | {
-            read -r line1
-            read -r line2
-            call_diff -L "destination: $line1" -L "source:      $line2" "$dest" "$src"
-        } | "${PAGER:-more}"
+        call_diff \
+            -L "destination: $(ls -l "$dest")" \
+            -L "source:      $(ls -l "$src")" \
+            "$dest" "$src" | "${PAGER:-more}"
 
         echo "$MYNAME: $src => $dest: Destination file differs from source file."
 
