@@ -53,7 +53,7 @@ call_diff () {
 }
 
 call_sdiff () {
-    sdiff ${SDIFF_FLAGS} "$@"
+    sdiff ${SDIFF_FLAGS} "$@" </dev/tty
 }
 
 do_imerge () {
