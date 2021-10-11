@@ -2,7 +2,7 @@
 #
 # imerge - help merge one file to another interactively
 #
-# Copyright (c) 2007, 2008, 2012 Akinori MUSHA
+# Copyright (c) 2007-2021 Akinori MUSHA
 #
 # All rights reserved.
 #
@@ -37,7 +37,7 @@ MYNAME="$(basename "$0")"
 VERSION="0.2.2"
 
 # workaround for ksh not having "local"
-__f__ () { local __x__; }; eval __f__ 2>/dev/null || local () { for __x__; do case "$__x__" in *=*) $__x__ ;; esac; done }; unset __f__ __x__
+__f__ () { local __x__; }; eval __f__ 2>/dev/null || eval 'local () { for __x__; do case "$__x__" in *=*) $__x__ ;; esac; done }'; unset __f__ __x__
 
 usage () {
     {
