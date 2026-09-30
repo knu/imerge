@@ -58,6 +58,14 @@ The following command line arguments are supported:
 
     Name of the pager program to run when showing differences.
 
+## INSTALLATION
+
+Install with [mise](https://mise.jdx.dev/):
+
+```sh
+mise use -g github:knu/imerge@latest
+```
+
 ## SEE ALSO
 
 [`diff(1)`](http://www.freebsd.org/cgi/man.cgi?query=diff&sektion=1),
